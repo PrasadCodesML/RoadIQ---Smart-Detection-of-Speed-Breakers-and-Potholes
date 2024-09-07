@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Displaying a map on a Webpage</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100% }
+        .custom-marker {
+            width: 30px;
+            height: 30px;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Red_Location_Marker_SVG.svg/153px-Red_Location_Marker_SVG.svg.png');
+            background-size: cover;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoicHJhc2FkLS1rayIsImEiOiJjbHdtdmx1ZzUwZnp0Mm1yemYwdDZ6aHZuIn0.pCDxtZ5pwvVbtaq2_2_q9g'; // Replace with your Mapbox access token
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [73.86830, 18.46350],
+        zoom: 15
+    });
+
+
+    map.addControl(new mapboxgl.FullscreenControl(), "top-right");
+    map.addControl(new mapboxgl.NavigationControl(),  "top-right");
+    map.addControl(
+        new MapboxDirections({
+            accessToken: mapboxgl.accessToken
+        }), 'top-left'
+    );
+    const speedBreakers = [];
+
+    function addMarker(lng, lat) {
+        const el = document.createElement('div');
+        el.className = 'custom-marker';
+        new mapboxgl.Marker(el)
+            .setLngLat([lng, lat])
+            .addTo(map);
+    }
+
+    fetch('https://coordinates-fb940-default-rtdb.asia-southeast1.firebasedatabase.app/coordinates.json')
+        .then(response => response.json())
+        .then(data => {
+            console.log(data); // Log the retrieved data to the console
+            
+            // Iterate over each coordinate object and add markers
+            data.forEach(coordinate => {
+                const { Latitude, Longitude } = coordinate; // Extract latitude and longitude
+                const el = document.createElement('div');
+                el.className = 'custom-marker';
+                new mapboxgl.Marker(el)
+                    .setLngLat([Longitude, Latitude]) // Note: Longitude first, then Latitude
+                    .addTo(map);
+            });
+        })
+        .catch(error => console.error('Error retrieving data:', error));
+    map.on('zoom', () => {
+        const zoomLevel = map.getZoom();
+        document.querySelectorAll('.custom-marker').forEach(marker => {
+            if (zoomLevel >= 16) {
+                marker.style.display = 'block'; // Show the marker
+            } else {
+                marker.style.display = 'none'; // Hide the marker
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script>
+            const button = document.getElementById('get-location')
+            function geoLocation(position){
+                console.log(position);
+            }
+            function failedToGet(){
+                console.log('Failed to get location');
+            }
+            button.addEventListener('click',async () => {
+                const result = navigator.geolocation.getCurrentPosition(geoLocation, failedToGet);
+
+            });
+        </script>
+
+    </head>
+    <title></title>
+    <body>
+        <h1>Getting users location</h1>
+        <button id = 'get-location'>Get location</button>
+    </body>
+</html>
